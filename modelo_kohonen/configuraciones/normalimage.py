@@ -18,19 +18,29 @@ def procesar_imagen(filepath):
     sumas_columnas = binarizada.sum(axis=0)
     return sumas_columnas
 
-# Función para procesar imágenes en una carpeta y guardar en CSV
+# Función para procesar imágenes en una carpeta de letras y guardar en CSV
 def procesar_imagenes_y_guardar(carpeta_imagenes, output_filepath):
     datos_imagenes = []
+    etiquetas = []
 
-    # Procesar cada imagen en la carpeta
-    for filename in os.listdir(carpeta_imagenes):
-        if filename.endswith(".png") or filename.endswith(".jpg"):
-            filepath = os.path.join(carpeta_imagenes, filename)
-            sumas_columnas = procesar_imagen(filepath)
-            datos_imagenes.append(sumas_columnas)
+    # Procesar cada carpeta de letra
+    for letra in os.listdir(carpeta_imagenes):
+        ruta_letra = os.path.join(carpeta_imagenes, letra)
+        if os.path.isdir(ruta_letra):  # Asegurarse de que es un directorio
+            for filename in os.listdir(ruta_letra):
+                if filename.endswith(".png") or filename.endswith(".jpg"):
+                    filepath = os.path.join(ruta_letra, filename)
+                    sumas_columnas = procesar_imagen(filepath)
+                    datos_imagenes.append(sumas_columnas)
+                    etiquetas.append(letra)  # Guardar la etiqueta de la letra
 
     # Convertir los datos a un DataFrame de Pandas
     df = pd.DataFrame(datos_imagenes)
 
+    # Agregar la columna de etiquetas
+    df['Etiqueta'] = etiquetas
+
     # Guardar el DataFrame en un archivo CSV
     df.to_csv(output_filepath, index=False)
+
+    print(f"Datos procesados y guardados en {output_filepath}.")
