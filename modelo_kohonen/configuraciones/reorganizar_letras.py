@@ -1,15 +1,11 @@
 import os
 import shutil
-
 # Directorio donde están actualmente todas las imágenes
 directorio_origen = 'letras'
-
 # Directorio donde se crearán las nuevas carpetas
 directorio_destino = 'letras_organizadas'
-
 # Lista de letras (todas en mayúsculas, con 'I' en lugar de 'L')
 letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'I', 'O', 'U', 'T']
-
 # Crear las carpetas para cada letra si no existen
 for letra in letras:
     nueva_carpeta = os.path.join(directorio_destino, f'letra{letra}')

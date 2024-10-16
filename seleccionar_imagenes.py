@@ -40,7 +40,7 @@ for letra in letras_obligatorias:
 imagenes_simulacion += random.sample(todas_las_imagenes, 19 - len(imagenes_simulacion))
 
 # Asegurarse de que las imágenes de simulación no se repitan en el entrenamiento
-# Seleccionar 80 imágenes para entrenamiento, asegurando que no se repitan letras
+# Seleccionar 80% de la cantidad de imágenes para entrenamiento
 imagenes_entrenamiento = []
 letras_usadas = set()
 
