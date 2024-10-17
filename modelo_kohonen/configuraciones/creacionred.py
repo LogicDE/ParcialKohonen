@@ -29,14 +29,13 @@ class RedKohonen:
             dm = np.mean(distancias_total)
             self.dm_values.append(dm)
 
-            # Graficar comportamiento de los pesos
-            self.graficar_pesos(iteracion)
-            self.graficar_dm()
+        # Graficar comportamiento de los pesos y DM al final del entrenamiento
+        self.graficar_pesos_final()
+        self.graficar_dm_final()
 
-            # Verificar condiciones de parada
-            if self.verificar_condiciones_parada(dm, iteracion):
-                print(f"Entrenamiento completado en iteración {iteracion}")
-                break
+        # Verificar condiciones de parada
+        if self.verificar_condiciones_parada(dm, iteracion):
+            print(f"Entrenamiento completado en iteración {iteracion}")
 
     def calcular_distancias(self, patron):
         return np.sqrt(np.sum((self.pesos - patron[:, np.newaxis]) ** 2, axis=0))
@@ -51,14 +50,14 @@ class RedKohonen:
         elif self.tipo_competencia == 'dura':
             self.pesos[:, neurona_vencedora] += self.tasa_aprendizaje * (patron - self.pesos[:, neurona_vencedora])
 
-    def graficar_pesos(self, iteracion):
+    def graficar_pesos_final(self):
         plt.figure(figsize=(10, 5))
         plt.imshow(self.pesos, aspect='auto', cmap='viridis')
-        plt.title(f'Pesos de la red en la iteración {iteracion}')
+        plt.title('Pesos de la red al final del entrenamiento')
         plt.colorbar()
         plt.show()
 
-    def graficar_dm(self):
+    def graficar_dm_final(self):
         plt.figure(figsize=(6, 4))
         plt.plot(self.dm_values, label="DM")
         plt.title("Distancia Media (DM) vs Iteraciones")
