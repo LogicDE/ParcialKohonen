@@ -51,20 +51,29 @@ class RedKohonen:
             self.pesos[:, neurona_vencedora] += self.tasa_aprendizaje * (patron - self.pesos[:, neurona_vencedora])
 
     def graficar_pesos_final(self):
-        plt.figure(figsize=(10, 5))
+        plt.figure(figsize=(12, 6))
         plt.imshow(self.pesos, aspect='auto', cmap='viridis')
-        plt.title('Pesos de la red al final del entrenamiento')
-        plt.colorbar()
+        plt.title('Pesos de la Red al Final del Entrenamiento', fontsize=16)
+        plt.colorbar(label='Valor de Peso')
+        plt.xlabel('Neuronas', fontsize=12)
+        plt.ylabel('Entradas', fontsize=12)
+        plt.grid(False)
+        plt.xticks(fontsize=10)
+        plt.yticks(fontsize=10)
+        plt.tight_layout()
         plt.show()
 
     def graficar_dm_final(self):
-        plt.figure(figsize=(6, 4))
-        plt.plot(self.dm_values, label="DM")
-        plt.title("Distancia Media (DM) vs Iteraciones")
-        plt.xlabel("Iteraciones")
-        plt.ylabel("DM")
+        plt.figure(figsize=(12, 6))
+        plt.plot(self.dm_values, label="DM", color='blue', marker='o', linestyle='-', markersize=5)
+        plt.title("Distancia Media (DM) vs Iteraciones", fontsize=16)
+        plt.xlabel("Iteraciones", fontsize=12)
+        plt.ylabel("DM", fontsize=12)
         plt.legend()
         plt.grid(True)
+        plt.xticks(fontsize=10)
+        plt.yticks(fontsize=10)
+        plt.tight_layout()
         plt.show()
     
     def verificar_condiciones_parada(self, dm, iteracion):
@@ -79,6 +88,7 @@ class RedKohonen:
             f.write(f'Número de entradas: {self.num_entradas}\n')
             f.write(f'Tasa de aprendizaje: {self.tasa_aprendizaje}\n')
             f.write(f'Número de iteraciones: {self.num_iteraciones}\n')
+
 
 
 
