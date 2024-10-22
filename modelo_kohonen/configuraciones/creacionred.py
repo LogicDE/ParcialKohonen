@@ -36,12 +36,14 @@ class RedKohonen:
             # Calcular y graficar el DM
             dm = np.mean(distancias_total)
             self.dm_values.append(dm)
+
+            # Graficar comportamiento de los pesos
+            self.graficar_pesos(iteracion)
             self.graficar_dm()
 
-            # Evaluar condiciones de parada
+            # Verificar condiciones de parada
             if self.verificar_condiciones_parada(dm, iteracion):
-                print(f"Entrenamiento completado en la iteración {iteracion}")
-                self.guardar_configuracion()  # Guardar pesos y configuración
+                print(f"Entrenamiento completado en iteración {iteracion}")
                 break
 
     def calcular_distancias(self, patron):
@@ -59,30 +61,23 @@ class RedKohonen:
         elif self.tipo_competencia == 'dura':
             self.pesos[:, neurona_vencedora] += self.tasa_aprendizaje * (patron - self.pesos[:, neurona_vencedora])
 
-        # Añadir ruido a los pesos en las últimas iteraciones
-        if iteracion > self.num_iteraciones * 0.8:
-            self.pesos += np.random.normal(0, 0.01, self.pesos.shape)
-
     def graficar_pesos(self, iteracion):
-        # Graficar pesos actuales de la red
-        self.ax[0].cla()  # Limpiar el gráfico anterior
-        self.ax[0].imshow(self.pesos, aspect='auto', cmap='viridis')
-        self.ax[0].set_title(f'Pesos de la red en la iteración {iteracion}')
-        self.ax[0].set_xlabel('Neuronas')
-        self.ax[0].set_ylabel('Entradas')
-        plt.pause(0.01)  # Actualización rápida del gráfico
+        plt.figure(figsize=(10, 5))
+        plt.imshow(self.pesos, aspect='auto', cmap='viridis')
+        plt.title(f'Pesos de la red en la iteración {iteracion}')
+        plt.colorbar()
+        plt.show()
 
     def graficar_dm(self):
-        # Graficar Distancia Media (DM) frente a iteraciones
-        self.ax[1].cla()  # Limpiar gráfico anterior
-        self.ax[1].plot(self.dm_values, label="DM", color='blue')
-        self.ax[1].set_title("Distancia Media (DM) vs Iteraciones")
-        self.ax[1].set_xlabel("Iteraciones")
-        self.ax[1].set_ylabel("DM")
-        self.ax[1].legend()
-        self.ax[1].grid(True)
-        plt.pause(0.01)  # Actualización rápida del gráfico
-
+        plt.figure(figsize=(6, 4))
+        plt.plot(self.dm_values, label="DM")
+        plt.title("Distancia Media (DM) vs Iteraciones")
+        plt.xlabel("Iteraciones")
+        plt.ylabel("DM")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+    
     def verificar_condiciones_parada(self, dm, iteracion):
         # Parar si el DM es menor que 0.1 o si se alcanzan las iteraciones máximas
         return dm < 0.1 or iteracion >= self.num_iteraciones
@@ -94,4 +89,6 @@ class RedKohonen:
             f.write(f'Número de entradas: {self.num_entradas}\n')
             f.write(f'Tasa de aprendizaje: {self.tasa_aprendizaje}\n')
             f.write(f'Número de iteraciones: {self.num_iteraciones}\n')
-        print("Pesos y configuración guardados con éxito.")
+
+
+
