@@ -1,0 +1,3 @@
+Número de entradas: 10
+Tasa de aprendizaje inicial: 0.1
+Número de iteraciones: 100
