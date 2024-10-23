@@ -3,9 +3,10 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import pandas as pd
 import numpy as np
-from configuraciones.normalimage import procesar_imagenes_y_guardar  # Asegúrate de que la ruta es correcta
+import matplotlib.pyplot as plt  # Importar matplotlib para la visualización
+from configuraciones.normalimage import procesar_imagenes_y_guardar
 from configuraciones.creaciondearchivoporletra import procesar_imagenes_y_guardar, procesar_carpetas
-from configuraciones.creacionred import RedKohonen  # Asegúrate de que la ruta es correcta
+from configuraciones.creacionred import RedKohonen
 
 # Variable global para almacenar la red
 red_kohonen = None
@@ -73,27 +74,13 @@ def entrenar_red():
         return
 
     try:
-        # Crear label para mostrar DM si no existe
-        if not hasattr(entrenar_red, 'dm_label'):
-            entrenar_red.dm_label = tk.Label(frame, text="DM: -", font=fuente_label, bg="#ffffff")
-            entrenar_red.dm_label.pack(padx=10, pady=5)
-
-        # Función callback para actualizar el DM en la interfaz
-        def actualizar_dm(texto):
-            entrenar_red.dm_label.config(text=texto)
-            root.update()
-
-        # Asignar callback a la red
-        red_kohonen.set_callback(actualizar_dm)
-
-        # Entrenar la red
+        # Entrenar la red de Kohonen con el dataset previamente cargado
         dataset = pd.read_csv(filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])).values
         if not np.issubdtype(dataset.dtype, np.number):
             messagebox.showerror("Error", "El dataset debe contener solo datos numéricos.")
             return
-            
         red_kohonen.entrenar(dataset)
-        messagebox.showinfo("Entrenamiento Completo", f"La red ha sido entrenada con éxito.\nMejor DM alcanzado: {red_kohonen.mejor_dm:.6f}")
+        messagebox.showinfo("Entrenamiento Completo", "La red ha sido entrenada con éxito.")
     except Exception as e:
         messagebox.showerror("Error", f"Error durante el entrenamiento: {e}")
 
@@ -112,6 +99,7 @@ def simular_red():
 
             # Comprobar la forma del data
             print(f"Forma del data: {data.shape}")  # Para verificar cuántas filas y columnas tiene
+            neuronas_vencedoras = []
 
             # Iterar sobre las filas (si quieres simular cada imagen)
             for i in range(data.shape[0]):
@@ -132,176 +120,94 @@ def simular_red():
 
                 # Simular la red con el patrón cargado
                 salida = red_kohonen.simular(patron)
+                neuronas_vencedoras.append(salida)
 
                 # Convertir la salida a cadena para mostrarla
                 salida_str = ', '.join(map(str, salida))
                 messagebox.showinfo(f"Simulación Completa - Imagen {i+1}", f"Salida de la red: {salida_str}")
 
+            # Después de procesar todos los patrones, graficar el mapa de Kohonen
+            graficar_mapa_kohonen(neuronas_vencedoras)
+
     except Exception as e:
         messagebox.showerror("Error", f"Error durante la simulación: {e}")
 
-# Configuración de estilos y colores
-COLOR_FONDO = "#F0F2F6"
-COLOR_FRAME = "#FFFFFF"
-COLOR_BOTON_CARGAR = "#4CAF50"
-COLOR_BOTON_ENTRENAR = "#2196F3" 
-COLOR_BOTON_SIMULAR = "#FF9800"
-PADDING_X = 30
-PADDING_Y = 20
+def graficar_mapa_kohonen(neuronas_vencedoras):
+    """Grafica el mapa de Kohonen basado en las neuronas vencedoras."""
+
+    # Convertir la lista de neuronas vencedoras a un arreglo NumPy
+    neuronas_vencedoras = np.array(neuronas_vencedoras)
+
+    # Graficar el mapa de Kohonen
+    plt.figure(figsize=(10, 6))
+    plt.scatter(neuronas_vencedoras[:, 0], neuronas_vencedoras[:, 1], c='blue', marker='o')
+    plt.title("Mapa de Kohonen")
+    plt.xlabel("Neuronas Vencedoras - Dimensión 1")
+    plt.ylabel("Neuronas Vencedoras - Dimensión 2")
+    plt.grid()
+    plt.show()
+
+#INTERFAZ-----------------------------------------------------------------------------
 
 # Configuración de la interfaz principal
 root = tk.Tk()
-root.title("Red Neuronal de Kohonen")
-root.geometry("800x700")
-root.configure(bg=COLOR_FONDO)
+root.title("Kohonen - Cargar Dataset y Procesar Imágenes")
+root.geometry("500x500")  # Aumentar el tamaño de la ventana
+root.configure(bg="#eaeaea")  # Cambiar el color de fondo
 
-# Frame principal con sombra y bordes redondeados
-frame = tk.Frame(root, bg=COLOR_FRAME, bd=0)
-frame.pack(padx=PADDING_X, pady=PADDING_Y, fill=tk.BOTH, expand=True)
+# Crear un marco para organizar los elementos
+frame = tk.Frame(root, bg="#ffffff", bd=2, relief=tk.RAISED)
+frame.pack(padx=20, pady=20, fill=tk.BOTH, expand=True)
 
-# Estilos de fuente mejorados
-fuente_titulo = ("Helvetica", 24, "bold")
-fuente_subtitulo = ("Helvetica", 14, "bold")
+# Estilo de fuente
+fuente_titulo = ("Helvetica", 18, "bold")
 fuente_label = ("Helvetica", 12)
-fuente_boton = ("Helvetica", 12, "bold")
+fuente_boton = ("Helvetica", 12)
 
-# Título con mejor espaciado y diseño
-titulo_frame = tk.Frame(frame, bg=COLOR_FRAME)
-titulo_frame.pack(pady=20, fill=tk.X)
+# Título
+titulo = tk.Label(frame, text="Kohonen Network", font=fuente_titulo, bg="#ffffff")
+titulo.pack(pady=10)
 
-titulo = tk.Label(titulo_frame, 
-                 text="Red Neuronal de Kohonen",
-                 font=fuente_titulo,
-                 bg=COLOR_FRAME,
-                 fg="#2C3E50")
-titulo.pack()
+# Botón para cargar el dataset desde un archivo CSV
+button_cargar = tk.Button(frame, text="Cargar Dataset", command=cargar_dataset, font=fuente_boton, bg="#4CAF50", fg="white", relief=tk.FLAT)
+button_cargar.pack(padx=10, pady=10, fill=tk.X)
 
-subtitulo = tk.Label(titulo_frame,
-                    text="Sistema de Reconocimiento de Patrones",
-                    font=fuente_subtitulo,
-                    bg=COLOR_FRAME,
-                    fg="#7F8C8D")
-subtitulo.pack(pady=(5,20))
+# Botón para entrenar la red
+button_entrenar = tk.Button(frame, text="Entrenar Red", command=entrenar_red, font=fuente_boton, bg="#2196F3", fg="white", relief=tk.FLAT)
+button_entrenar.pack(padx=10, pady=10, fill=tk.X)
 
-# Frame para los botones principales
-botones_frame = tk.Frame(frame, bg=COLOR_FRAME)
-botones_frame.pack(pady=20, padx=50)
+# Botón para simular la red
+button_simular = tk.Button(frame, text="Simular Red", command=simular_red, font=fuente_boton, bg="#FF9800", fg="white", relief=tk.FLAT)
+button_simular.pack(padx=10, pady=10, fill=tk.X)
 
-# Estilo común para botones
-button_style = {
-    'font': fuente_boton,
-    'fg': 'white',
-    'relief': tk.FLAT,
-    'padx': 20,
-    'pady': 10,
-    'width': 20,
-    'cursor': 'hand2'
-}
+# Etiquetas para mostrar el número de entradas y patrones
+label_entradas = tk.Label(frame, text="Número de entradas: -", font=fuente_label, bg="#ffffff")
+label_entradas.pack(padx=10, pady=5)
 
-button_cargar = tk.Button(botones_frame, 
-                         text="Cargar Dataset",
-                         command=cargar_dataset,
-                         bg=COLOR_BOTON_CARGAR,
-                         **button_style)
-button_cargar.pack(pady=10)
+label_patrones = tk.Label(frame, text="Número de patrones: -", font=fuente_label, bg="#ffffff")
+label_patrones.pack(padx=10, pady=5)
 
-button_entrenar = tk.Button(botones_frame,
-                          text="Entrenar Red",
-                          command=entrenar_red,
-                          bg=COLOR_BOTON_ENTRENAR,
-                          **button_style)
-button_entrenar.pack(pady=10)
+# Paso 6: Tipo de competencia
+competencia_var = tk.StringVar(value='dura')  # Valor por defecto
+tk.Label(frame, text="Tipo de Competencia:", font=fuente_label, bg="#ffffff").pack(pady=5)
 
-button_simular = tk.Button(botones_frame,
-                         text="Simular Red",
-                         command=simular_red,
-                         bg=COLOR_BOTON_SIMULAR,
-                         **button_style)
-button_simular.pack(pady=10)
+# Centrar los botones de opción
+radiobutton_frame = tk.Frame(frame, bg="#ffffff")  # Crear un marco para los radiobuttons
+radiobutton_frame.pack(pady=5)  # Empaquetar el marco
 
-# Frame para información y parámetros
-info_frame = tk.Frame(frame, bg=COLOR_FRAME)
-info_frame.pack(pady=20, fill=tk.X, padx=50)
+tk.Radiobutton(radiobutton_frame, text="Competencia Dura", variable=competencia_var, value='dura', bg="#ffffff").pack(anchor=tk.W, padx=20)  # Ajustar el padding
+tk.Radiobutton(radiobutton_frame, text="Competencia Blanda", variable=competencia_var, value='blanda', bg="#ffffff").pack(anchor=tk.W, padx=20)  # Ajustar el padding
 
-# Estilo para las etiquetas de información
-info_style = {
-    'font': fuente_label,
-    'bg': COLOR_FRAME,
-    'pady': 5
-}
+# Paso 10: Tasa de aprendizaje
+tk.Label(frame, text="Tasa de Aprendizaje:", font=fuente_label, bg="#ffffff").pack(pady=5)
+tasa_aprendizaje_entry = tk.Entry(frame, font=fuente_label)
+tasa_aprendizaje_entry.pack(padx=10, pady=5)
+tasa_aprendizaje_entry.insert(0, "0.1")  # Valor por defecto
 
-# Información del dataset con mejor formato
-label_entradas = tk.Label(info_frame, text="Número de entradas: -", **info_style)
-label_entradas.pack()
-
-label_patrones = tk.Label(info_frame, text="Número de patrones: -", **info_style)
-label_patrones.pack()
-
-# Frame para parámetros de configuración
-config_frame = tk.Frame(frame, bg=COLOR_FRAME)
-config_frame.pack(pady=20, fill=tk.X, padx=50)
-
-# Tipo de competencia con mejor diseño
-tk.Label(config_frame, text="Tipo de Competencia:", font=fuente_subtitulo, bg=COLOR_FRAME).pack(pady=(10,5))
-
-competencia_frame = tk.Frame(config_frame, bg=COLOR_FRAME)
-competencia_frame.pack()
-
-competencia_var = tk.StringVar(value='dura')
-tk.Radiobutton(competencia_frame, 
-               text="Competencia Dura",
-               variable=competencia_var,
-               value='dura',
-               bg=COLOR_FRAME,
-               font=fuente_label).pack(side=tk.LEFT, padx=10)
-tk.Radiobutton(competencia_frame,
-               text="Competencia Blanda",
-               variable=competencia_var,
-               value='blanda',
-               bg=COLOR_FRAME,
-               font=fuente_label).pack(side=tk.LEFT, padx=10)
-
-# Entradas de parámetros con mejor diseño
-params_frame = tk.Frame(config_frame, bg=COLOR_FRAME)
-params_frame.pack(pady=20)
-
-# Estilo común para entradas
-entry_style = {
-    'font': fuente_label,
-    'width': 15,
-    'relief': tk.SOLID,
-    'bd': 1
-}
-
-# Tasa de aprendizaje
-tk.Label(params_frame, text="Tasa de Aprendizaje:", font=fuente_label, bg=COLOR_FRAME).pack()
-tasa_aprendizaje_entry = tk.Entry(params_frame, **entry_style)
-tasa_aprendizaje_entry.pack(pady=(5,15))
-tasa_aprendizaje_entry.insert(0, "0.1")
-
-# Número de iteraciones
-tk.Label(params_frame, text="Número de Iteraciones:", font=fuente_label, bg=COLOR_FRAME).pack()
-iteraciones_entry = tk.Entry(params_frame, **entry_style)
-iteraciones_entry.pack(pady=5)
-iteraciones_entry.insert(0, "100")
-
-def on_enter(e, button):
-    button['background'] = {
-        COLOR_BOTON_CARGAR: '#45a049',
-        COLOR_BOTON_ENTRENAR: '#1976D2',
-        COLOR_BOTON_SIMULAR: '#F57C00'
-    }[button['background']]
-
-def on_leave(e, button):
-    button['background'] = {
-        '#45a049': COLOR_BOTON_CARGAR,
-        '#1976D2': COLOR_BOTON_ENTRENAR,
-        '#F57C00': COLOR_BOTON_SIMULAR
-    }[button['background']]
-
-# Vincular efectos hover a los botones
-for btn in [button_cargar, button_entrenar, button_simular]:
-    btn.bind("<Enter>", lambda e, b=btn: on_enter(e, b))
-    btn.bind("<Leave>", lambda e, b=btn: on_leave(e, b))
+# Paso 9: Número de iteraciones
+tk.Label(frame, text="Número de Iteraciones:", font=fuente_label, bg="#ffffff").pack(pady=5)
+iteraciones_entry = tk.Entry(frame, font=fuente_label)
+iteraciones_entry.pack(padx=10, pady=5)
+iteraciones_entry.insert(0, "100")  # Valor por defecto
 
 root.mainloop()
