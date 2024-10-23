@@ -106,32 +106,29 @@ def simular_red():
             for i in range(data.shape[0]):
                 patron = data[i]  # Extraer el vector de la fila i
 
-                print(f"Longitud del patrón: {len(patron)}")
-                print(f"Número de entradas de la red: {red_kohonen.num_entradas}")
-
-                # Verificar que el patrón contenga solo datos numéricos
-                if not np.issubdtype(patron.dtype, np.number):
-                    messagebox.showerror("Error", "El patrón debe contener solo datos numéricos.")
-                    return
-
-                # Verificar la dimensión del patrón
-                if len(patron) != red_kohonen.num_entradas:
-                    messagebox.showerror("Error", f"El patrón debe tener {red_kohonen.num_entradas} entradas.")
-                    return
-
                 # Simular la red con el patrón cargado
                 salida = red_kohonen.simular(patron)
                 neuronas_vencedoras.append(salida)
 
-                # Convertir la salida a cadena para mostrarla
-                salida_str = ', '.join(map(str, salida))
-                messagebox.showinfo(f"Simulación Completa - Imagen {i+1}", f"Salida de la red: {salida_str}")
+                # Graficar la letra en el mapa de Kohonen
+                graficar_letra_en_mapa_kohonen(patron, salida)
+                
+                # Comparar la salida con los patrones
+                letra_reconocida = comparar_con_patrones(salida, data)
+                print(f"Letra reconocida: {letra_reconocida}")
 
-            # Después de procesar todos los patrones, graficar el mapa de Kohonen
-            graficar_mapa_kohonen(neuronas_vencedoras)
 
     except Exception as e:
         messagebox.showerror("Error", f"Error durante la simulación: {e}")
+        
+def comparar_con_patrones(salida, patrones):
+    """Compara la salida de la red con los patrones y devuelve la letra reconocida."""
+    # Aquí asumimos que los patrones están en la misma forma que la salida
+    # Puedes ajustar la lógica de comparación según sea necesario
+    distancias = np.linalg.norm(patrones - salida, axis=1)  # Calcular distancias
+    indice_menor_distancia = np.argmin(distancias)  # Índice del patrón más cercano
+    letra_reconocida = f"Patrón {indice_menor_distancia}"  # Ajusta esto según tu estructura de etiquetas
+    return letra_reconocida
 
 def graficar_mapa_kohonen(neuronas_vencedoras):
     """Grafica el mapa de Kohonen basado en las neuronas vencedoras."""
@@ -146,6 +143,23 @@ def graficar_mapa_kohonen(neuronas_vencedoras):
     plt.xlabel("Neuronas Vencedoras - Dimensión 1")
     plt.ylabel("Neuronas Vencedoras - Dimensión 2")
     plt.grid()
+    plt.show()
+
+def graficar_letra_en_mapa_kohonen(patron, salida):
+    """Grafica la letra en el mapa de Kohonen basado en el patrón y la salida."""
+    plt.figure(figsize=(5, 5))  # Tamaño de figura revertido a 5x5
+    
+    # Asegúrate de que el patrón tenga 10 elementos para poder representarlo como 2x5
+    if patron.size == 10:
+        plt.imshow(patron.reshape(2, 5), cmap='gray', interpolation='nearest')  # Asumiendo que el patrón es de 2x5
+    else:
+        messagebox.showerror("Error", "El patrón debe tener exactamente 10 entradas.")
+        return
+
+    plt.title("Letra Simulada")
+    plt.colorbar()
+    plt.scatter(salida[0], salida[1], color='red', s=100)  # Marcar la neurona vencedora
+    plt.axis('off')  # Ocultar los ejes para una mejor visualización
     plt.show()
 
 #INTERFAZ-----------------------------------------------------------------------------
