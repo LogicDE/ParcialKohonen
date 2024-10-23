@@ -67,19 +67,33 @@ def cargar_dataset():
 
 # Función para entrenar la red
 def entrenar_red():
-    global red_kohonen  # Usar la variable global
+    global red_kohonen
     if red_kohonen is None:
         messagebox.showerror("Error", "Primero debe cargar un dataset.")
         return
 
     try:
-        # Entrenar la red de Kohonen con el dataset previamente cargado
+        # Crear label para mostrar DM si no existe
+        if not hasattr(entrenar_red, 'dm_label'):
+            entrenar_red.dm_label = tk.Label(frame, text="DM: -", font=fuente_label, bg="#ffffff")
+            entrenar_red.dm_label.pack(padx=10, pady=5)
+
+        # Función callback para actualizar el DM en la interfaz
+        def actualizar_dm(texto):
+            entrenar_red.dm_label.config(text=texto)
+            root.update()
+
+        # Asignar callback a la red
+        red_kohonen.set_callback(actualizar_dm)
+
+        # Entrenar la red
         dataset = pd.read_csv(filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])).values
         if not np.issubdtype(dataset.dtype, np.number):
             messagebox.showerror("Error", "El dataset debe contener solo datos numéricos.")
             return
+            
         red_kohonen.entrenar(dataset)
-        messagebox.showinfo("Entrenamiento Completo", "La red ha sido entrenada con éxito.")
+        messagebox.showinfo("Entrenamiento Completo", f"La red ha sido entrenada con éxito.\nMejor DM alcanzado: {red_kohonen.mejor_dm:.6f}")
     except Exception as e:
         messagebox.showerror("Error", f"Error durante el entrenamiento: {e}")
 
