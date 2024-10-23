@@ -83,6 +83,49 @@ def entrenar_red():
     except Exception as e:
         messagebox.showerror("Error", f"Error durante el entrenamiento: {e}")
 
+# Función para simular la red
+def simular_red():
+    global red_kohonen
+    if red_kohonen is None:
+        messagebox.showerror("Error", "Primero debe cargar y entrenar la red.")
+        return
+
+    try:
+        filepath = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+        if filepath:
+            # Leer el CSV sin encabezados
+            data = pd.read_csv(filepath, header=None).values
+
+            # Comprobar la forma del data
+            print(f"Forma del data: {data.shape}")  # Para verificar cuántas filas y columnas tiene
+
+            # Iterar sobre las filas (si quieres simular cada imagen)
+            for i in range(data.shape[0]):
+                patron = data[i]  # Extraer el vector de la fila i
+
+                print(f"Longitud del patrón: {len(patron)}")
+                print(f"Número de entradas de la red: {red_kohonen.num_entradas}")
+
+                # Verificar que el patrón contenga solo datos numéricos
+                if not np.issubdtype(patron.dtype, np.number):
+                    messagebox.showerror("Error", "El patrón debe contener solo datos numéricos.")
+                    return
+
+                # Verificar la dimensión del patrón
+                if len(patron) != red_kohonen.num_entradas:
+                    messagebox.showerror("Error", f"El patrón debe tener {red_kohonen.num_entradas} entradas.")
+                    return
+
+                # Simular la red con el patrón cargado
+                salida = red_kohonen.simular(patron)
+
+                # Convertir la salida a cadena para mostrarla
+                salida_str = ', '.join(map(str, salida))
+                messagebox.showinfo(f"Simulación Completa - Imagen {i+1}", f"Salida de la red: {salida_str}")
+
+    except Exception as e:
+        messagebox.showerror("Error", f"Error durante la simulación: {e}")
+
 # Configuración de la interfaz principal
 root = tk.Tk()
 root.title("Kohonen - Cargar Dataset y Procesar Imágenes")
@@ -109,6 +152,10 @@ button_cargar.pack(padx=10, pady=10, fill=tk.X)
 # Botón para entrenar la red
 button_entrenar = tk.Button(frame, text="Entrenar Red", command=entrenar_red, font=fuente_boton, bg="#2196F3", fg="white", relief=tk.FLAT)
 button_entrenar.pack(padx=10, pady=10, fill=tk.X)
+
+# Botón para simular la red
+button_simular = tk.Button(frame, text="Simular Red", command=simular_red, font=fuente_boton, bg="#FF9800", fg="white", relief=tk.FLAT)
+button_simular.pack(padx=10, pady=10, fill=tk.X)
 
 # Etiquetas para mostrar el número de entradas y patrones
 label_entradas = tk.Label(frame, text="Número de entradas: -", font=fuente_label, bg="#ffffff")
