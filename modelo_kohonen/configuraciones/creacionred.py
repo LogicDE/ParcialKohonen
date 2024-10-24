@@ -45,7 +45,7 @@ class RedKohonen:
             if dm < self.mejor_dm:
                 self.mejor_dm = dm
 
-            self.actualizar_graficos(axs, iteracion)
+            self.actualizar_graficos(axs, iteracion, dm)
             
             # Actualizar interfaz si hay callback
             if self.callback:
@@ -73,10 +73,10 @@ class RedKohonen:
         else:
             self.pesos[:, neurona_vencedora] += self.tasa_aprendizaje * (patron - self.pesos[:, neurona_vencedora])
 
-    def actualizar_graficos(self, axs, iteracion):
+    def actualizar_graficos(self, axs, iteracion, dm):
         axs[0].cla()
         axs[0].imshow(self.pesos, aspect='auto', cmap='viridis')
-        axs[0].set_title(f'Pesos en la iteración {iteracion}')
+        axs[0].set_title(f'Pesos en la iteración {iteracion} (DM: {dm:.6f})')
         axs[0].set_xlabel('Neuronas')
         axs[0].set_ylabel('Entradas')
 
@@ -99,9 +99,17 @@ class RedKohonen:
     
     def cargar_pesos(self, pesos):
         self.pesos = pesos  # Cargar pesos óptimos desde un archivo o variable
-
+    
     def simular(self, patron):
         distancias = self.calcular_distancias(patron)  # Calcular distancias
         neurona_vencedora = np.argmin(distancias)  # Neurona con menor distancia
         return self.pesos[:, neurona_vencedora]  # Retornar los pesos de la neurona vencedora
     
+    def comparar_pesos(self, dataset):
+        dataset = np.array(dataset)
+        for patron in dataset:
+            distancias = self.calcular_distancias(patron)  # Calcular distancias
+            neurona_vencedora = np.argmin(distancias)  # Neurona con menor distancia
+            distancia_minima = distancias[neurona_vencedora]
+            
+            print(f"Patrón: {patron}, Neurona Vencedora: {neurona_vencedora}, Distancia: {distancia_minima:.6f}")
