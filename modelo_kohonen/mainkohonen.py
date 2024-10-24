@@ -166,62 +166,72 @@ def simular_red():
 # Configuración de la interfaz principal
 root = tk.Tk()
 root.title("Kohonen - Cargar Dataset y Procesar Imágenes")
-root.geometry("500x500")  # Aumentar el tamaño de la ventana
-root.configure(bg="#eaeaea")  # Cambiar el color de fondo
+root.geometry("600x600")  # Aumentar el tamaño de la ventana
+root.configure(bg="#f0f0f0")  # Cambiar el color de fondo
 
 # Crear un marco para organizar los elementos
-frame = tk.Frame(root, bg="#ffffff", bd=2, relief=tk.RAISED)
+frame = tk.Frame(root, bg="#ffffff", bd=5, relief=tk.GROOVE)
 frame.pack(padx=20, pady=20, fill=tk.BOTH, expand=True)
 
+# Configurar la cuadrícula para que sea responsive
+frame.grid_rowconfigure(0, weight=1)
+frame.grid_rowconfigure(1, weight=1)
+frame.grid_rowconfigure(2, weight=1)
+frame.grid_rowconfigure(3, weight=1)
+frame.grid_rowconfigure(4, weight=1)
+frame.grid_rowconfigure(5, weight=1)
+frame.grid_rowconfigure(6, weight=1)
+frame.grid_columnconfigure(0, weight=1)
+
 # Estilo de fuente
-fuente_titulo = ("Helvetica", 18, "bold")
-fuente_label = ("Helvetica", 12)
-fuente_boton = ("Helvetica", 12)
+fuente_titulo = ("Arial", 20, "bold")
+fuente_label = ("Arial", 12)
+fuente_boton = ("Arial", 12)
 
 # Título
-titulo = tk.Label(frame, text="Kohonen Network", font=fuente_titulo, bg="#ffffff")
-titulo.pack(pady=10)
+titulo = tk.Label(frame, text="Kohonen Network", font=fuente_titulo, bg="#ffffff", fg="#333333")
+titulo.grid(row=0, column=0, pady=10)
 
 # Botón para cargar el dataset desde un archivo CSV
-button_cargar = tk.Button(frame, text="Cargar Dataset", command=cargar_dataset, font=fuente_boton, bg="#4CAF50", fg="white", relief=tk.FLAT)
-button_cargar.pack(padx=10, pady=10, fill=tk.X)
+button_cargar = tk.Button(frame, text="Cargar Dataset", command=cargar_dataset, font=fuente_boton, bg="#4CAF50", fg="white", relief=tk.RAISED)
+button_cargar.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
 
 # Botón para entrenar la red
-button_entrenar = tk.Button(frame, text="Entrenar Red", command=entrenar_red, font=fuente_boton, bg="#2196F3", fg="white", relief=tk.FLAT)
-button_entrenar.pack(padx=10, pady=10, fill=tk.X)
+button_entrenar = tk.Button(frame, text="Entrenar Red", command=entrenar_red, font=fuente_boton, bg="#2196F3", fg="white", relief=tk.RAISED)
+button_entrenar.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
 
 # Botón para simular la red
-button_simular = tk.Button(frame, text="Simular Red", command=simular_red, font=fuente_boton, bg="#FF9800", fg="white", relief=tk.FLAT)
-button_simular.pack(padx=10, pady=10, fill=tk.X)
+button_simular = tk.Button(frame, text="Simular Red", command=simular_red, font=fuente_boton, bg="#FF9800", fg="white", relief=tk.RAISED)
+button_simular.grid(row=3, column=0, padx=10, pady=10, sticky="ew")
 
 # Etiquetas para mostrar el número de entradas y patrones
-label_entradas = tk.Label(frame, text="Número de entradas: -", font=fuente_label, bg="#ffffff")
-label_entradas.pack(padx=10, pady=5)
+label_entradas = tk.Label(frame, text="Número de entradas: -", font=fuente_label, bg="#ffffff", fg="#333333")
+label_entradas.grid(row=4, column=0, padx=10, pady=5)
 
-label_patrones = tk.Label(frame, text="Número de patrones: -", font=fuente_label, bg="#ffffff")
-label_patrones.pack(padx=10, pady=5)
+label_patrones = tk.Label(frame, text="Número de patrones: -", font=fuente_label, bg="#ffffff", fg="#333333")
+label_patrones.grid(row=5, column=0, padx=10, pady=5)
 
 # Paso 6: Tipo de competencia
 competencia_var = tk.StringVar(value='dura')  # Valor por defecto
-tk.Label(frame, text="Tipo de Competencia:", font=fuente_label, bg="#ffffff").pack(pady=5)
+tk.Label(frame, text="Tipo de Competencia:", font=fuente_label, bg="#ffffff", fg="#333333").grid(row=6, column=0, pady=5)
 
 # Centrar los botones de opción
 radiobutton_frame = tk.Frame(frame, bg="#ffffff")  # Crear un marco para los radiobuttons
-radiobutton_frame.pack(pady=5)  # Empaquetar el marco
+radiobutton_frame.grid(row=7, column=0, pady=5)  # Empaquetar el marco
 
-tk.Radiobutton(radiobutton_frame, text="Competencia Dura", variable=competencia_var, value='dura', bg="#ffffff").pack(anchor=tk.W, padx=20)  # Ajustar el padding
-tk.Radiobutton(radiobutton_frame, text="Competencia Blanda", variable=competencia_var, value='blanda', bg="#ffffff").pack(anchor=tk.W, padx=20)  # Ajustar el padding
+tk.Radiobutton(radiobutton_frame, text="Competencia Dura", variable=competencia_var, value='dura', bg="#ffffff", fg="#333333").pack(anchor=tk.W, padx=20)  # Ajustar el padding
+tk.Radiobutton(radiobutton_frame, text="Competencia Blanda", variable=competencia_var, value='blanda', bg="#ffffff", fg="#333333").pack(anchor=tk.W, padx=20)  # Ajustar el padding
 
 # Paso 10: Tasa de aprendizaje
-tk.Label(frame, text="Tasa de Aprendizaje:", font=fuente_label, bg="#ffffff").pack(pady=5)
-tasa_aprendizaje_entry = tk.Entry(frame, font=fuente_label)
-tasa_aprendizaje_entry.pack(padx=10, pady=5)
+tk.Label(frame, text="Tasa de Aprendizaje:", font=fuente_label, bg="#ffffff", fg="#333333").grid(row=8, column=0, pady=5)
+tasa_aprendizaje_entry = tk.Entry(frame, font=fuente_label, bd=2, relief=tk.SUNKEN)
+tasa_aprendizaje_entry.grid(row=9, column=0, padx=10, pady=5)
 tasa_aprendizaje_entry.insert(0, "0.1")  # Valor por defecto
 
 # Paso 9: Número de iteraciones
-tk.Label(frame, text="Número de Iteraciones:", font=fuente_label, bg="#ffffff").pack(pady=5)
-iteraciones_entry = tk.Entry(frame, font=fuente_label)
-iteraciones_entry.pack(padx=10, pady=5)
+tk.Label(frame, text="Número de Iteraciones:", font=fuente_label, bg="#ffffff", fg="#333333").grid(row=10, column=0, pady=5)
+iteraciones_entry = tk.Entry(frame, font=fuente_label, bd=2, relief=tk.SUNKEN)
+iteraciones_entry.grid(row=11, column=0, padx=10, pady=5)
 iteraciones_entry.insert(0, "100")  # Valor por defecto
 
 root.mainloop()

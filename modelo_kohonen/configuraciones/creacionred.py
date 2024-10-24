@@ -115,11 +115,12 @@ class RedKohonen:
     
     def comparar_pesos(self, dataset):
         dataset = np.array(dataset)
-        for patron in dataset:
+        for i, patron in enumerate(dataset):
             distancias = self.calcular_distancias(patron)  # Calcular distancias
-            print(f"Forma del patrón: {patron.shape}, Forma de los pesos: {red_kohonen.pesos.shape}")
-            print(f"Distancia calculada para el patrón {i+1}: {distancia}")  # Verifica la distancia
             neurona_vencedora = np.argmin(distancias)  # Neurona con menor distancia
-            distancia_minima = distancias[neurona_vencedora]
-            
+            distancia_minima = distancias[neurona_vencedora]  # Distancia mínima
+
+            # Asegúrate de que red_kohonen esté accesible
+            print(f"Forma del patrón: {patron.shape}, Forma de los pesos: {self.pesos.shape}")
+            print(f"Distancia calculada para el patrón {i+1}: {distancia_minima}")  # Verifica la distancia
             print(f"Patrón: {patron}, Neurona Vencedora: {neurona_vencedora}, Distancia: {distancia_minima:.6f}")
