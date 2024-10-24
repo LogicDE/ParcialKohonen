@@ -63,7 +63,12 @@ class RedKohonen:
         plt.show()
 
     def calcular_distancias(self, patron):
-        return np.sqrt(np.sum((self.pesos - patron[:, np.newaxis]) ** 2, axis=0))
+        if patron.ndim == 1:
+            patron = patron[:, np.newaxis]  # Asegúrate de que patron sea 2D
+        if self.pesos.ndim == 1:
+            self.pesos = self.pesos[:, np.newaxis]  # Asegúrate de que pesos sea 2D
+        return np.sqrt(np.sum((self.pesos - patron) ** 2, axis=0))
+    
 
     def actualizar_pesos(self, patron, neurona_vencedora, iteracion):
         if self.tipo_competencia == 'blanda':
@@ -112,6 +117,8 @@ class RedKohonen:
         dataset = np.array(dataset)
         for patron in dataset:
             distancias = self.calcular_distancias(patron)  # Calcular distancias
+            print(f"Forma del patrón: {patron.shape}, Forma de los pesos: {red_kohonen.pesos.shape}")
+            print(f"Distancia calculada para el patrón {i+1}: {distancia}")  # Verifica la distancia
             neurona_vencedora = np.argmin(distancias)  # Neurona con menor distancia
             distancia_minima = distancias[neurona_vencedora]
             

@@ -8,8 +8,9 @@ from configuraciones.normalimage import procesar_imagenes_y_guardar
 from configuraciones.creaciondearchivoporletra import procesar_imagenes_y_guardar, procesar_carpetas
 from configuraciones.creacionred import RedKohonen
 
-# Variable global para almacenar la red
+# Variables globales para almacenar la red y el dataset
 red_kohonen = None
+dataset_global = None  # Nueva variable global para el dataset
 
 # Función para cargar los pesos desde un archivo
 def cargar_pesos():
@@ -24,18 +25,18 @@ def cargar_pesos():
 
 # Función para cargar el dataset desde un archivo CSV
 def cargar_dataset():
-    global red_kohonen, tasa_aprendizaje_entry, iteraciones_entry
+    global red_kohonen, tasa_aprendizaje_entry, iteraciones_entry, dataset_global
     try:
         filepath = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
         if filepath:
-            dataset = pd.read_csv(filepath)
+            dataset_global = pd.read_csv(filepath)  # Cargar el dataset en la variable global
 
-            if not np.issubdtype(dataset.dtypes.iloc[0], np.number):
+            if not np.issubdtype(dataset_global.dtypes.iloc[0], np.number):
                 messagebox.showerror("Error", "El dataset debe contener solo datos numéricos.")
                 return
 
-            num_entradas = dataset.shape[1]
-            num_patrones = dataset.shape[0]
+            num_entradas = dataset_global.shape[1]
+            num_patrones = dataset_global.shape[0]
 
             label_entradas.config(text=f"Número de entradas: {num_entradas}")
             label_patrones.config(text=f"Número de patrones: {num_patrones}")
@@ -72,22 +73,22 @@ def cargar_dataset():
 
 # Función para entrenar la red
 def entrenar_red():
-    global red_kohonen
+    global red_kohonen, dataset_global  # Usar la variable global del dataset
     if red_kohonen is None:
         messagebox.showerror("Error", "Primero debe cargar un dataset.")
         return
 
     try:
-        dataset = pd.read_csv(filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])).values
-        if not np.issubdtype(dataset.dtype, np.number):
-            messagebox.showerror("Error", "El dataset debe contener solo datos numéricos.")
+        if dataset_global is None:
+            messagebox.showerror("Error", "Primero debe cargar un dataset.")
             return
-        red_kohonen.entrenar(dataset)
+
+        # Entrenar la red con el dataset cargado previamente
+        red_kohonen.entrenar(dataset_global.values)  # Usar el dataset global
         messagebox.showinfo("Entrenamiento Completo", "La red ha sido entrenada con éxito.")
         messagebox.showinfo("DM Total", f"El DM total es: {red_kohonen.mejor_dm}")
     except Exception as e:
         messagebox.showerror("Error", f"Error durante el entrenamiento: {e}")
-
 
 # Función para simular la red y mostrar las salidas junto con las neuronas vencedoras
 def simular_red():
@@ -96,7 +97,6 @@ def simular_red():
         messagebox.showerror("Error", "Primero debe cargar y entrenar la red.")
         return
     
-    
     try:
         filepath = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
         if filepath:
@@ -104,6 +104,7 @@ def simular_red():
             print(f"Forma del data: {data.shape}")
             neuronas_vencedoras = []
             distancias = []  # Almacenar distancias para análisis
+            diferencias_promedio = []  # Almacenar diferencias promedio
 
             for i in range(data.shape[0]):
                 patron = data[i]
@@ -126,8 +127,18 @@ def simular_red():
                 distancia = red_kohonen.calcular_distancias(patron)
                 distancias.append(distancia)
 
+                # Identificar neurona vencedora
+                index_vencedora = np.argmin(distancia)
+                pesos_vencedora = red_kohonen.pesos[:, index_vencedora]
+
+                # Calcular diferencia promedio entre el patrón y la neurona vencedora
+                diferencia_promedio = np.mean(np.abs(patron - pesos_vencedora))
+                diferencias_promedio.append(diferencia_promedio)
+
                 salida_str = ', '.join(map(str, neurona_vencedora))
-                messagebox.showinfo(f"Simulación Completa - Imagen {i+1}", f"Neurona ganadora en coordenadas: {salida_str}")
+                messagebox.showinfo(f"Simulación Completa - Imagen {i+1}", 
+                                    f"Neurona ganadora en coordenadas: {salida_str}, "
+                                    f"Diferencia promedio: {diferencia_promedio:.4f}")
 
                 print(neuronas_vencedoras)  # Asegúrate de que contiene pares (x, y)
 
@@ -135,36 +146,19 @@ def simular_red():
             for j in range(len(neuronas_vencedoras)):
                 neurona = neuronas_vencedoras[j]
                 distancia_neurona = distancias[j]
+                diferencia_promedio = diferencias_promedio[j]
 
-                print(f"Patrón {j+1}: Neurona vencedora: {neurona}, Distancia: {distancia_neurona}")
+                print(f"Patrón {j+1}: Neurona vencedora: {neurona}, Distancia: {distancia_neurona}, "
+                      f"Diferencia promedio: {diferencia_promedio:.4f}")
 
-                # Aquí puedes implementar condiciones para evaluar similitudes
-                # Por ejemplo, puedes definir un umbral para considerar que son similares
-                if distancia_neurona[neurona] < 0.1:  # Umbral ejemplo
+                # Evaluar similitudes
+                if diferencia_promedio < 0.1:  # Umbral ejemplo
                     print(f"Patrón {j+1} es similar a la neurona vencedora.")
                 else:
                     print(f"Patrón {j+1} no es similar a la neurona vencedora.")
 
-            # Graficar el mapa de Kohonen
-            graficar_mapa_kohonen(neuronas_vencedoras)
-
     except Exception as e:
         messagebox.showerror("Error", f"Error durante la simulación: {e}")
-
-
-# Función para graficar el mapa de Kohonen y las activaciones
-def graficar_mapa_kohonen(neuronas_vencedoras, salidas_neuronas, mapa_dim=10):
-    mapa_kohonen = np.zeros((mapa_dim, mapa_dim))
-
-    for i, (x, y) in enumerate(neuronas_vencedoras):
-        print(f"Neurona vencedora para imagen {i+1}: ({x}, {y}) - Salida: {salidas_neuronas[i]}")
-        mapa_kohonen[y, x] = 1
-
-    plt.figure(figsize=(8, 8))
-    plt.imshow(mapa_kohonen, cmap='viridis')
-    plt.title("Mapa Autoorganizado de Kohonen (SOM)")
-    plt.colorbar(label='Activación de la neurona vencedora')
-    plt.show()
 
 
 #INTERFAZ-----------------------------------------------------------------------------
