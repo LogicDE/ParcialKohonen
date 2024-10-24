@@ -95,7 +95,8 @@ def simular_red():
     if red_kohonen is None:
         messagebox.showerror("Error", "Primero debe cargar y entrenar la red.")
         return
-
+    
+    
     try:
         filepath = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
         if filepath:
