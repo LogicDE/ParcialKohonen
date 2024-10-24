@@ -54,6 +54,9 @@ class RedKohonen:
             if self.verificar_condiciones_parada(dm, iteracion):
                 print(f"Entrenamiento completado en iteración {iteracion}")
                 print(f"DM final: {dm:.6f}")
+                # Mensaje en la interfaz con el DM final
+                if self.callback:
+                    self.callback(f"La red ha sido entrenada con éxito.\nMejor DM alcanzado: {self.mejor_dm:.6f}\nDM final: {dm:.6f}")
                 break
 
         plt.ioff()

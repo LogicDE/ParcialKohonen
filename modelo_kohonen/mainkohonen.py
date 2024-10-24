@@ -84,6 +84,7 @@ def entrenar_red():
             return
         red_kohonen.entrenar(dataset)
         messagebox.showinfo("Entrenamiento Completo", "La red ha sido entrenada con éxito.")
+        messagebox.showinfo("DM Total", f"El DM total es: {red_kohonen.mejor_dm}")
     except Exception as e:
         messagebox.showerror("Error", f"Error durante el entrenamiento: {e}")
 
